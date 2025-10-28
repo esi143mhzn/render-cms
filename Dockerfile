@@ -15,22 +15,30 @@ COPY . /var/www/html/
 # Set working directory
 WORKDIR /var/www/html/
 
+# Set Apache document root to Laravel's public folder
+RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
+
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
+# Clear Laravel caches
+RUN php artisan config:clear \
+    && php artisan route:clear \
+    && php artisan view:clear
+
 # Set proper permissions for Laravel storage
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Allow .htaccess override and fix permissions
-RUN echo '<Directory /var/www/html/>\n\
+RUN echo '<Directory /var/www/html/public>\n\
     AllowOverride All\n\
     Require all granted\n\
 </Directory>' > /etc/apache2/conf-available/laravel.conf \
     && a2enconf laravel
-    
+
 # Expose port 80 for Render
 EXPOSE 80
 

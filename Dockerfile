@@ -29,6 +29,9 @@ RUN php artisan config:clear \
     && php artisan route:clear \
     && php artisan view:clear
 
+# Run migrations automatically (for Free Tier)
+RUN php artisan migrate --force
+
 # Set proper permissions for Laravel storage
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 

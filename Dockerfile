@@ -24,6 +24,13 @@ RUN composer install --no-dev --optimize-autoloader
 # Set proper permissions for Laravel storage
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
+# Allow .htaccess override and fix permissions
+RUN echo '<Directory /var/www/html/>\n\
+    AllowOverride All\n\
+    Require all granted\n\
+</Directory>' > /etc/apache2/conf-available/laravel.conf \
+    && a2enconf laravel
+    
 # Expose port 80 for Render
 EXPOSE 80
 
